@@ -16,6 +16,8 @@ function main() {
   // フラグを追加
   let isCleared = false;
 
+  let isError = false;
+
   // ボタンを取得
   const inputButtons = document.querySelectorAll(
     ".input-btn, .operator-btn, .submit-btn",
@@ -60,11 +62,20 @@ function main() {
         waitingForSecondValue = false;
 
         isCleared = true;
+        isError = false;
         return;
       }
 
-      // クリア後に「.」と演算子を無視する
-      if (isCleared && (inputValue === "." || operators.includes(inputValue))) {
+      if (isError && inputValue !== "C") {
+        return;
+      }
+
+      // クリア後に「.」と演算子を無視する(-だけ入力できる)
+      if (
+        isCleared &&
+        (inputValue === "." || operators.includes(inputValue)) &&
+        inputValue !== "-"
+      ) {
         return;
       }
 
@@ -91,9 +102,15 @@ function main() {
 
       // =の処理
       if (inputValue === "=") {
+        // 数字だけで=を押しても何もしない
+        if (operator === "") {
+          return;
+        }
+
         // 演算子の後に「=」を押すとエラーになる
         if (waitingForSecondValue) {
           display!.textContent = "エラー";
+          isError = true;
           return;
         }
         const secondValue = displayValue!;
@@ -115,6 +132,7 @@ function main() {
         if (operator === "÷") {
           if (Number(secondValue) === 0) {
             display!.textContent = "エラー";
+            isError = true;
             return;
           }
           result = Number(firstValue) / Number(secondValue);
